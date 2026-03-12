@@ -1,6 +1,7 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from .database import engine, Base
 from .routers import employee_router  # ← we'll create this next
@@ -12,6 +13,15 @@ app = FastAPI(
     title="Employee & Attendance Management API",
     description="RESTful API built with FastAPI + PostgreSQL",
     version="1.0.0",
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or specific domains
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include routers

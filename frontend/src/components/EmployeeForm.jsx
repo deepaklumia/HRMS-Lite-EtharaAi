@@ -1,8 +1,8 @@
 import { useState } from "react";
-import Input from "./ui/Input";
-import Select from "./ui/Select";
-import Button from "./ui/Button";
-import Alert from "./ui/Alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DEPARTMENTS } from "../constants/departments";
 
 export default function EmployeeForm({
@@ -74,52 +74,87 @@ export default function EmployeeForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {successMsg && <Alert type="success" message={successMsg} />}
-      {errors.submit && <Alert type="error" message={errors.submit} />}
+      {successMsg && (
+        <Alert className="bg-emerald-50 text-emerald-900 border-emerald-200">
+          <AlertDescription>{successMsg}</AlertDescription>
+        </Alert>
+      )}
+      {errors.submit && (
+        <Alert variant="destructive">
+          <AlertDescription>{errors.submit}</AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          label="Employee ID"
-          name="employee_id"
-          value={formData.employee_id}
-          onChange={handleChange}
-          error={errors.employee_id}
-          placeholder="EMP001"
-        />
-        <Input
-          label="Full Name"
-          name="full_name"
-          value={formData.full_name}
-          onChange={handleChange}
-          error={errors.full_name}
-          placeholder="John Doe"
-        />
+        <div className="space-y-2">
+          <Label htmlFor="employee_id">Employee ID</Label>
+          <Input
+            id="employee_id"
+            name="employee_id"
+            value={formData.employee_id}
+            onChange={handleChange}
+            placeholder="EMP001"
+          />
+          {errors.employee_id && (
+            <p className="text-sm text-red-600">{errors.employee_id}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="full_name">Full Name</Label>
+          <Input
+            id="full_name"
+            name="full_name"
+            value={formData.full_name}
+            onChange={handleChange}
+            placeholder="John Doe"
+          />
+          {errors.full_name && (
+            <p className="text-sm text-red-600">{errors.full_name}</p>
+          )}
+        </div>
       </div>
 
-      <Input
-        label="Email Address"
-        name="email"
-        type="email"
-        value={formData.email}
-        onChange={handleChange}
-        error={errors.email}
-        placeholder="john@example.com"
-      />
+      <div className="space-y-2">
+        <Label htmlFor="email">Email Address</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          placeholder="john@example.com"
+        />
+        {errors.email && (
+          <p className="text-sm text-red-600">{errors.email}</p>
+        )}
+      </div>
 
-      <Select
-        label="Department"
-        name="department"
-        value={formData.department}
-        onChange={handleChange}
-        error={errors.department}
-        options={DEPARTMENTS.map((dept) => ({ value: dept, label: dept }))}
-      />
+      <div className="space-y-2">
+        <Label htmlFor="department">Department</Label>
+        <select
+          id="department"
+          name="department"
+          value={formData.department}
+          onChange={handleChange}
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <option value="">Select department</option>
+          {DEPARTMENTS.map((dept) => (
+            <option key={dept} value={dept}>
+              {dept}
+            </option>
+          ))}
+        </select>
+        {errors.department && (
+          <p className="text-sm text-red-600">{errors.department}</p>
+        )}
+      </div>
 
       <div className="flex gap-3 justify-end">
         {onCancel && (
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             onClick={onCancel}
             disabled={loading || formLoading}
           >

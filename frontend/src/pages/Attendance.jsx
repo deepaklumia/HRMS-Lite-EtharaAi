@@ -4,8 +4,8 @@ import AttendanceTable from "../components/AttendanceTable";
 import AttendanceStats from "../components/AttendanceStats";
 import { useApi } from "../hooks/useApi";
 import api from "../lib/api";
-import Alert from "../components/ui/Alert";
-import LoadingSpinner from "../components/ui/LoadingSpinner";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CalendarCheck, ClipboardList } from "lucide-react";
 
 export default function Attendance() {
@@ -69,8 +69,16 @@ export default function Attendance() {
 
   return (
     <div className="space-y-8">
-      {error && <Alert type="error" message={error} />}
-      {successMsg && <Alert type="success" message={successMsg} />}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {successMsg && (
+        <Alert className="bg-emerald-50 text-emerald-900 border-emerald-200">
+          <AlertDescription>{successMsg}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Page Header */}
       <div className="mb-2">
@@ -88,14 +96,7 @@ export default function Attendance() {
       </div>
 
       {/* Today's Attendance Stats */}
-      <AttendanceStats
-        stats={{
-          totalPresent: 42,
-          totalAbsent: 8,
-          onLeave: 5,
-          late: 3,
-        }}
-      />
+      <AttendanceStats />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -136,8 +137,8 @@ export default function Attendance() {
             </div>
 
             {loading ? (
-              <div className="py-12">
-                <LoadingSpinner />
+              <div className="py-12 flex justify-center">
+                <Spinner className="size-8" />
               </div>
             ) : attendance.length === 0 ? (
               <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl border-2 border-dashed border-indigo-300 py-20 text-center shadow-lg">

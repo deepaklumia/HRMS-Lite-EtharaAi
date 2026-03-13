@@ -1,12 +1,67 @@
+import { useState, useEffect } from "react";
 import { Users, UserCheck, UserX, Calendar } from "lucide-react";
+import api from "../lib/api";
 
-export default function AttendanceStats({ stats = {} }) {
-  const { totalPresent = 42, totalAbsent = 8, onLeave = 5, late = 3 } = stats;
+export default function AttendanceStats() {
+  const [stats, setStats] = useState({
+    totalPresent: 0,
+    totalAbsent: 0,
+    totalEmployees: 0,
+    loading: true,
+  });
+
+  useEffect(() => {
+    fetchAttendanceStats();
+  }, []);
+
+  const fetchAttendanceStats = async () => {
+    try {
+      const response = await api.getAllEmployees();
+      const employees = response.data;
+      
+      const today = new Date().toISOString().split('T')[0];
+      let presentCount = 0;
+      let absentCount = 0;
+
+      for (const employee of employees) {
+        try {
+          const attendanceResponse = await api.getAttendance(employee.employee_id);
+          const attendanceRecords = attendanceResponse.data;
+          
+          const todayRecord = attendanceRecords.find(
+            record => record.date.split('T')[0] === today
+          );
+
+          if (todayRecord) {
+            if (todayRecord.status === 'Present') {
+              presentCount++;
+            } else if (todayRecord.status === 'Absent') {
+              absentCount++;
+            }
+          } else {
+            absentCount++;
+          }
+        } catch (err) {
+          absentCount++;
+        }
+      }
+
+      setStats({
+        totalPresent: presentCount,
+        totalAbsent: absentCount,
+        totalEmployees: employees.length,
+        loading: false,
+      });
+    } catch (error) {
+      console.error('Failed to fetch attendance stats:', error);
+      setStats(prev => ({ ...prev, loading: false }));
+    }
+  };
 
   const statCards = [
     {
       label: "Present",
-      value: totalPresent,
+      value: stats.loading ? "..." : stats.totalPresent,
       icon: UserCheck,
       color: "bg-gradient-to-br from-green-50 to-emerald-100",
       textColor: "text-green-700",
@@ -15,30 +70,12 @@ export default function AttendanceStats({ stats = {} }) {
     },
     {
       label: "Absent",
-      value: totalAbsent,
+      value: stats.loading ? "..." : stats.totalAbsent,
       icon: UserX,
       color: "bg-gradient-to-br from-red-50 to-rose-100",
       textColor: "text-red-700",
       iconColor: "text-red-600",
       borderColor: "border-red-200",
-    },
-    {
-      label: "On Leave",
-      value: onLeave,
-      icon: Calendar,
-      color: "bg-gradient-to-br from-amber-50 to-yellow-100",
-      textColor: "text-amber-700",
-      iconColor: "text-amber-600",
-      borderColor: "border-amber-200",
-    },
-    {
-      label: "Late",
-      value: late,
-      icon: Users,
-      color: "bg-gradient-to-br from-blue-50 to-indigo-100",
-      textColor: "text-blue-700",
-      iconColor: "text-blue-600",
-      borderColor: "border-blue-200",
     },
   ];
 

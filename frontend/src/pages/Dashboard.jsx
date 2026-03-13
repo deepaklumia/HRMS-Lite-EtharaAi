@@ -26,13 +26,46 @@ export default function Dashboard() {
 
   const loadData = async () => {
     try {
-      const data = await fetchEmployees();
-      setEmployees(data);
+      const employeesData = await fetchEmployees();
+      setEmployees(employeesData);
+      
+      // Calculate actual attendance for today
+      const today = new Date().toISOString().split('T')[0];
+      let presentCount = 0;
+      let absentCount = 0;
+
+      for (const employee of employeesData) {
+        try {
+          const attendanceResponse = await api.getAttendance(employee.employee_id);
+          const attendanceRecords = attendanceResponse.data;
+          
+          const todayRecord = attendanceRecords.find(
+            record => record.date.split('T')[0] === today
+          );
+
+          if (todayRecord) {
+            if (todayRecord.status === 'Present') {
+              presentCount++;
+            } else if (todayRecord.status === 'Absent') {
+              absentCount++;
+            }
+          } else {
+            absentCount++;
+          }
+        } catch (err) {
+          absentCount++;
+        }
+      }
+
+      const attendanceRate = employeesData.length > 0 
+        ? Math.round((presentCount / employeesData.length) * 100) 
+        : 0;
+
       setStats({
-        total: data.length,
-        present: Math.floor(data.length * 0.85),
-        absent: Math.floor(data.length * 0.15),
-        rate: 85,
+        total: employeesData.length,
+        present: presentCount,
+        absent: absentCount,
+        rate: attendanceRate,
       });
     } catch (err) {
       console.error("Failed to load data:", err);
